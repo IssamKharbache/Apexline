@@ -14,6 +14,7 @@ import {
 import { ChevronDown, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface RacesInfoProps {
   races: RaceSession[];
@@ -108,9 +109,9 @@ const RacesInfos = ({ races, year }: RacesInfoProps) => {
               <p>{session.country_name}</p>
             </div>
             <div className="flex items-center justify-between">
-              <button className="border rounded-lg px-5 py-2">
-                Info and Details
-              </button>
+              <Link href={`/racing/${year}/${session.country_name}`}>
+                Info and details
+              </Link>
               <p className="text-md">{formatDateShort(session.date_start)}</p>
             </div>
           </div>
