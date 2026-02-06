@@ -11,36 +11,76 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 interface RacesInfoProps {
   races: RaceSession[];
+  year: string;
 }
-const RacesInfos = ({ races }: RacesInfoProps) => {
+const RacesInfos = ({ races, year }: RacesInfoProps) => {
+  const router = useRouter();
+  const pathName = usePathname();
+  const [chosenYear, setChosenYear] = useState<string>(year);
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const currentYear = new Date().getFullYear();
 
   const racesOnly = races.filter(
     (r) => r.session_type === "Race" && r.session_name === "Race",
   );
+  const MIN_YEAR = 2023;
 
-  const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
+  const years = Array.from(
+    { length: currentYear - MIN_YEAR + 1 },
+    (_, i) => currentYear - i,
+  );
 
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [pathName]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="flex items-center p-8 justify-center">
+          <Loader2 className="animate-spin mt-24 size-14" />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className=" min-h-screen bg-black text-white">
       <div className="flex items-center p-8 justify-between text-4xl">
-        <p>{currentYear} FIA FORMULA ONE WORLD CHAMPIONSHIP™ RACE CALENDAR</p>
+        <p>{year} FIA FORMULA ONE WORLD CHAMPIONSHIP™ RACE CALENDAR</p>
         <div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="flex items-center justify-between py-4 px-7 text-lg rounded-2xl text-black">
-                {currentYear}
+                {chosenYear}
                 <ChevronDown />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="mr-5">
               <DropdownMenuGroup>
-                {years.map((year) => (
-                  <DropdownMenuItem key={year}>{year}</DropdownMenuItem>
+                {years.map((yearMap) => (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      const year = yearMap.toString();
+                      setChosenYear(year);
+                      router.push(`/schedule/${year}`);
+                    }}
+                    className={`${yearMap === Number(chosenYear) ? "bg-primary" : ""}  m-1 border`}
+                    key={yearMap}
+                  >
+                    {yearMap}
+                  </DropdownMenuItem>
                 ))}
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -60,9 +100,13 @@ const RacesInfos = ({ races }: RacesInfoProps) => {
                 svg
                 title={session.country_name}
               />
+
               <p>{session.circuit_short_name}</p>
             </div>
-            <p>{session.country_name}</p>
+            <div className="flex items-center gap-1">
+              <p>{session.location},</p>
+              <p>{session.country_name}</p>
+            </div>
             <div className="flex items-center justify-between">
               <button className="border rounded-lg px-5 py-2">
                 Info and Details
@@ -81,7 +125,6 @@ export default RacesInfos;
 function formatDateShort(isoDate: string) {
   const date = new Date(isoDate);
 
-  // Options for month short name and day
   const options: Intl.DateTimeFormatOptions = {
     month: "short",
     day: "numeric",

@@ -14,7 +14,7 @@ const page = async ({ params }: Props) => {
   if (!data) return null;
   return (
     <div>
-      <RacesInfos races={data} />
+      <RacesInfos races={data} year={year} />
     </div>
   );
 };
