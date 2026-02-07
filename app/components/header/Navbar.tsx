@@ -38,7 +38,7 @@ const Navbar = () => {
           </Link>
         ))}
       </div>
-      <div>Left menu</div>
+      <div>menu here</div>
     </nav>
   );
 };

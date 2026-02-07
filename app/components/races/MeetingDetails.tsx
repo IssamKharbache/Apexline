@@ -1,8 +1,8 @@
 import { RaceSession } from "@/app/types/currentSeasonRace";
 import { Meeting } from "@/app/types/meetingType";
 import { CalendarDays, Clock, MapPin, Flag } from "lucide-react";
-
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Tracktime from "./TimeTabs";
+import TimeChanging from "./TimeChanging";
 
 interface MeetingDetailsProps {
   meeting: Meeting;
@@ -25,10 +25,6 @@ const MeetingDetails = async ({
       {/* Header Section */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-            <Flag size={14} />
-            {meeting.country_code}
-          </div>
           <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
             {meeting.year} Season
           </span>
@@ -73,15 +69,7 @@ const MeetingDetails = async ({
                 <CalendarDays className="text-blue-600" />
                 Event Schedule
               </h3>
-
-              <div>
-                <Tabs defaultValue="overview">
-                  <TabsList variant="line">
-                    <TabsTrigger value="overview">My time</TabsTrigger>
-                    <TabsTrigger value="analytics">Track time</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+              <Tracktime />
             </div>
 
             {meetingSessionsData.map((s) => (
@@ -96,7 +84,13 @@ const MeetingDetails = async ({
                   <div> | </div>
                   <p>{s.session_name}</p>
                 </div>
-                <div>{formatTimeRange(s.date_start, s.date_end)}</div>
+                <div>
+                  <TimeChanging
+                    dateStart={s.date_start}
+                    dateEnd={s.date_end}
+                    offset={s.gmt_offset}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -141,18 +135,6 @@ const MeetingDetails = async ({
 };
 
 export default MeetingDetails;
-
-function formatTimeRange(dateStart: string, dateEnd: string): string {
-  const start = new Date(dateStart);
-  const end = new Date(dateEnd);
-
-  const pad = (num: number) => num.toString().padStart(2, "0");
-
-  const startTime = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
-  const endTime = `${pad(end.getHours())}:${pad(end.getMinutes())}`;
-
-  return `${startTime} - ${endTime}`;
-}
 
 function formatDateDayMonth(isoString: string): string {
   const date = new Date(isoString);
